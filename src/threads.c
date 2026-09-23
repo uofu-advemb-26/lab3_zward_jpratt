@@ -6,6 +6,7 @@
 #include <pico/multicore.h>
 #include <pico/cyw43_arch.h>
 #include "safe.h"
+#include "led.h"
 
 #define MAIN_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1UL )
 #define MAIN_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
@@ -17,7 +18,6 @@ SemaphoreHandle_t count_semaphore;
 SemaphoreHandle_t uart_semaphore;
 
 int counter;
-int on;
 
 void side_thread(void *params)
 {
@@ -36,18 +36,15 @@ void main_thread(void *params)
 {
     int local_count = 0;
     char *thread_name = "main";
+    int led_state = 0;
 
 	while (1) {
-        // Commit the LED's state
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
+        led_state = update_led(led_state);
 
         vTaskDelay(100);
 
         local_count = safe_increment(&counter, count_semaphore);
         safe_hello(thread_name, local_count, uart_semaphore);
-
-        // Update the LED's state
-        on = !on;
 	}
 }
 
@@ -56,7 +53,6 @@ int main(void)
     stdio_init_all();
     hard_assert(cyw43_arch_init() == PICO_OK);
 
-    on = false;
     counter = 0;
     count_semaphore = xSemaphoreCreateCounting(1, 1);
     uart_semaphore = xSemaphoreCreateCounting(1, 1);
