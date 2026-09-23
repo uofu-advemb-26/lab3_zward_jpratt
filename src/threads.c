@@ -5,7 +5,7 @@
 #include <pico/stdlib.h>
 #include <pico/multicore.h>
 #include <pico/cyw43_arch.h>
-#include "count.h"
+#include "safe.h"
 
 #define MAIN_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1UL )
 #define MAIN_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
@@ -22,24 +22,20 @@ int on;
 void side_thread(void *params)
 {
     int local_count = 0;
+    char *thread_name = "thread";
 
 	while (1) {
         vTaskDelay(100);
 
         local_count = safe_increment(&counter, count_semaphore);
-
-        // The printf to the UART is a separate resource, so it should be protected separately from the counter
-        xSemaphoreTake(uart_semaphore, portMAX_DELAY);
-        {
-            printf("hello world from %s! Count %d\n", "thread", local_count);
-        }
-        xSemaphoreGive(uart_semaphore);
+        safe_hello(thread_name, local_count, uart_semaphore);
 	}
 }
 
 void main_thread(void *params)
 {
     int local_count = 0;
+    char *thread_name = "main";
 
 	while (1) {
         // Commit the LED's state
@@ -48,13 +44,7 @@ void main_thread(void *params)
         vTaskDelay(100);
 
         local_count = safe_increment(&counter, count_semaphore);
-
-        // The printf to the UART is a separate resource, so it should be protected separately from the counter
-        xSemaphoreTake(uart_semaphore, portMAX_DELAY);
-        {
-            printf("hello world from %s! Count %d\n", "main", local_count);
-        }
-        xSemaphoreGive(uart_semaphore);
+        safe_hello(thread_name, local_count, uart_semaphore);
 
         // Update the LED's state
         on = !on;
