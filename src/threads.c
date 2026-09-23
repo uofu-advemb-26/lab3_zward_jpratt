@@ -5,6 +5,7 @@
 #include <pico/stdlib.h>
 #include <pico/multicore.h>
 #include <pico/cyw43_arch.h>
+#include "count.h"
 
 #define MAIN_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1UL )
 #define MAIN_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
@@ -25,16 +26,7 @@ void side_thread(void *params)
 	while (1) {
         vTaskDelay(100);
 
-        // Critical section: capture and increment the global counter
-        // to minimize critical section code
-        // NOTE: setting the time-out to portMAX_DELAY means that 
-        // xSemaphoreTake only returns when the semaphore was acquired,
-        // so there's no need to check the return value.
-        xSemaphoreTake(count_semaphore, portMAX_DELAY);
-        {
-            local_count = ++counter;
-        }
-        xSemaphoreGive(count_semaphore);
+        local_count = safe_increment(&counter, count_semaphore);
 
         // The printf to the UART is a separate resource, so it should be protected separately from the counter
         xSemaphoreTake(uart_semaphore, portMAX_DELAY);
@@ -55,16 +47,7 @@ void main_thread(void *params)
 
         vTaskDelay(100);
 
-        // Critical section: capture and increment the global counter
-        // to minimize critical section code
-        // NOTE: setting the time-out to portMAX_DELAY means that 
-        // xSemaphoreTake only returns when the semaphore was acquired,
-        // so there's no need to check the return value.
-        xSemaphoreTake(count_semaphore, portMAX_DELAY);
-        {
-            local_count = ++counter;
-        }
-        xSemaphoreGive(count_semaphore);
+        local_count = safe_increment(&counter, count_semaphore);
 
         // The printf to the UART is a separate resource, so it should be protected separately from the counter
         xSemaphoreTake(uart_semaphore, portMAX_DELAY);
