@@ -19,19 +19,52 @@ int on;
 
 void side_thread(void *params)
 {
+    int local_count = 0;
+
 	while (1) {
         vTaskDelay(100);
-        counter += 1;
-		printf("hello world from %s! Count %d\n", "thread", counter);
+
+        // Critical section: capture and increment the global counter
+        // to minimize critical section code
+        // NOTE: setting the time-out to portMAX_DELAY means that 
+        // xSemaphoreTake only returns when the semaphore was acquired,
+        // so there's no need to check the return value.
+        xSemaphoreTake(semaphore, portMAX_DELAY);
+        {
+            local_count = ++counter;
+        }
+        xSemaphoreGive(semaphore);
+
+        // Output from the captured variable after leaving the critical section
+        printf("hello world from %s! Count %d\n", "thread", local_count);
 	}
 }
 
 void main_thread(void *params)
 {
+    int local_count = 0;
+
 	while (1) {
+        // Commit the LED's state
         cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
+
         vTaskDelay(100);
-		printf("hello world from %s! Count %d\n", "main", counter++);
+
+        // Critical section: capture and increment the global counter
+        // to minimize critical section code
+        // NOTE: setting the time-out to portMAX_DELAY means that 
+        // xSemaphoreTake only returns when the semaphore was acquired,
+        // so there's no need to check the return value.
+        xSemaphoreTake(semaphore, portMAX_DELAY);
+        {
+            local_count = ++counter;
+        }
+        xSemaphoreGive(semaphore);
+
+        // Output from the captured variable after leaving the critical section
+        printf("hello world from %s! Count %d\n", "main", local_count);
+
+        // Update the LED's state
         on = !on;
 	}
 }
