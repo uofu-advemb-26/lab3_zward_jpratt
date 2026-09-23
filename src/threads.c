@@ -40,14 +40,17 @@ int main(void)
 {
     stdio_init_all();
     hard_assert(cyw43_arch_init() == PICO_OK);
+
     on = false;
     counter = 0;
-    TaskHandle_t main, side;
     semaphore = xSemaphoreCreateCounting(1, 1);
+
+    TaskHandle_t main, side;
     xTaskCreate(main_thread, "MainThread",
                 MAIN_TASK_STACK_SIZE, NULL, MAIN_TASK_PRIORITY, &main);
     xTaskCreate(side_thread, "SideThread",
                 SIDE_TASK_STACK_SIZE, NULL, SIDE_TASK_PRIORITY, &side);
+
     vTaskStartScheduler();
 	return 0;
 }
