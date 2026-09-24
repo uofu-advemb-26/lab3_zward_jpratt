@@ -14,26 +14,36 @@
 #define SIDE_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1UL )
 #define SIDE_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 
-SemaphoreHandle_t count_semaphore;
-SemaphoreHandle_t uart_semaphore;
+typedef struct {
+    SemaphoreHandle_t count_semaphore;
+    SemaphoreHandle_t uart_semaphore;
+    int counter;
+} Params_t;
+Params_t params = {0};
 
-int counter;
-
-void side_thread(void *params)
+void side_thread(void *void_params)
 {
+    // Prepare params for access
+    Params_t *params = (Params_t *)void_params;
+
+    // Locals
     int local_count = 0;
     char *thread_name = "thread";
 
 	while (1) {
         vTaskDelay(100);
 
-        local_count = safe_increment(&counter, count_semaphore);
-        safe_hello(thread_name, local_count, uart_semaphore);
+        local_count = safe_increment(&params->counter, params->count_semaphore);
+        safe_hello(thread_name, local_count, params->uart_semaphore);
 	}
 }
 
-void main_thread(void *params)
+void main_thread(void *void_params)
 {
+    // Prepare params for access
+    Params_t *params = (Params_t *)void_params;
+
+    // Locals
     int local_count = 0;
     char *thread_name = "main";
     int led_state = 0;
@@ -43,8 +53,8 @@ void main_thread(void *params)
 
         vTaskDelay(100);
 
-        local_count = safe_increment(&counter, count_semaphore);
-        safe_hello(thread_name, local_count, uart_semaphore);
+        local_count = safe_increment(&params->counter, params->count_semaphore);
+        safe_hello(thread_name, local_count, params->uart_semaphore);
 	}
 }
 
@@ -53,15 +63,15 @@ int main(void)
     stdio_init_all();
     hard_assert(cyw43_arch_init() == PICO_OK);
 
-    counter = 0;
-    count_semaphore = xSemaphoreCreateCounting(1, 1);
-    uart_semaphore = xSemaphoreCreateCounting(1, 1);
+    params.count_semaphore = xSemaphoreCreateCounting(1, 1);
+    params.uart_semaphore = xSemaphoreCreateCounting(1, 1);
+    params.counter = 0;
 
     TaskHandle_t main, side;
     xTaskCreate(main_thread, "MainThread",
-                MAIN_TASK_STACK_SIZE, NULL, MAIN_TASK_PRIORITY, &main);
+                MAIN_TASK_STACK_SIZE, (void *)&params, MAIN_TASK_PRIORITY, &main);
     xTaskCreate(side_thread, "SideThread",
-                SIDE_TASK_STACK_SIZE, NULL, SIDE_TASK_PRIORITY, &side);
+                SIDE_TASK_STACK_SIZE, (void *)&params, SIDE_TASK_PRIORITY, &side);
 
     vTaskStartScheduler();
 	return 0;
