@@ -3,6 +3,8 @@ add_executable(test_all
   test_safe_increment.c
   test_safe_hello.c
   ../src/safe.c
+  test_led.c
+  ../src/led.c
   unity_config.c
 )
 

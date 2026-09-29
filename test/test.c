@@ -7,6 +7,7 @@
 #include <semphr.h>
 #include "test_safe_increment.h"
 #include "test_safe_hello.h"
+#include "test_led.h"
 
 SemaphoreHandle_t semaphore;
 int counter;
@@ -35,6 +36,7 @@ void test_xSemaphore_status()
 int main (void)
 {
     stdio_init_all();
+    hard_assert(cyw43_arch_init() == PICO_OK);
     while (1) {
         sleep_ms(5000); // Give time for TTY to attach.
         printf("Start tests\n");
@@ -51,6 +53,9 @@ int main (void)
 
         RUN_TEST(test_safe_hello_releases_semaphore);
         RUN_TEST(test_safe_hello_does_not_change_counter);
+
+        RUN_TEST(test_led_off);
+        RUN_TEST(test_led_on);
         UNITY_END();
         sleep_ms(5000);
     }
