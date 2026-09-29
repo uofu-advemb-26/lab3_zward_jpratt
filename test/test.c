@@ -41,6 +41,7 @@ int main (void)
         UNITY_BEGIN();
         RUN_TEST(test_xSemaphore_status);
 
+        RUN_TEST(test_safe_increment_releases_semaphore);
         RUN_TEST(test_increment_updates_counter);
         RUN_TEST(test_increment_updates_count);
         RUN_TEST(test_increment_multiple_times);

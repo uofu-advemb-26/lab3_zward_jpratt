@@ -1,5 +1,12 @@
 #include "test_safe_increment.h"
 
+void test_safe_increment_releases_semaphore()
+{
+    safe_increment(&counter, semaphore, 10);
+    // After calling safe_increment, the semaphore should be available for other threads.
+    TEST_ASSERT_EQUAL_INT(1, uxSemaphoreGetCount(semaphore));
+}
+
 // Test safe_increment function to ensure it correctly increments the counter and returns the new value.
 void test_increment_updates_counter()
 {
