@@ -8,6 +8,11 @@
 #include "test_safe_increment.h"
 #include "test_safe_hello.h"
 #include "test_led.h"
+#include "test_deadlocks.h"
+
+// Same priority as deadlocking threads
+#define MAIN_PRIORITY      ( tskIDLE_PRIORITY + 1UL )
+#define MAIN_STACK_SIZE configMINIMAL_STACK_SIZE
 
 SemaphoreHandle_t semaphore;
 int counter;
@@ -33,10 +38,8 @@ void test_xSemaphore_status()
     xSemaphoreGive(semaphore);
 }
 
-int main (void)
+void run_tests()
 {
-    stdio_init_all();
-    hard_assert(cyw43_arch_init() == PICO_OK);
     while (1) {
         sleep_ms(5000); // Give time for TTY to attach.
         printf("Start tests\n");
@@ -56,7 +59,19 @@ int main (void)
 
         RUN_TEST(test_led_off);
         RUN_TEST(test_led_on);
+
+        RUN_TEST(test_deadlock);
         UNITY_END();
         sleep_ms(5000);
     }
+}
+
+int main (void)
+{
+    stdio_init_all();
+    hard_assert(cyw43_arch_init() == PICO_OK);
+
+    xTaskCreate(run_tests, "Test Thread",
+                MAIN_STACK_SIZE, NULL, MAIN_PRIORITY, NULL);
+    vTaskStartScheduler();
 }

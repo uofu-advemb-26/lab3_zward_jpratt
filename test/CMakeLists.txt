@@ -5,6 +5,8 @@ add_executable(test_all
   ../src/safe.c
   test_led.c
   ../src/led.c
+  test_deadlocks.c
+  ../src/deadlocks.c
   unity_config.c
 )
 
