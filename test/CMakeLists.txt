@@ -1,5 +1,6 @@
 add_executable(test_all 
   test.c
+  ../src/safe.c
   unity_config.c
 )
 

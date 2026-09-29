@@ -5,7 +5,7 @@
 #include <FreeRTOS.h>
 #include <semphr.h>
 
-int safe_increment(int *counter, SemaphoreHandle_t semaphore);
+int safe_increment(int *counter, SemaphoreHandle_t semaphore, TickType_t wait_ticks);
 void safe_hello(const char *thread_id, const int count, SemaphoreHandle_t semaphore);
 
 #endif

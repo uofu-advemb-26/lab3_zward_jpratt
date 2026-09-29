@@ -1,21 +1,18 @@
 #include "safe.h"
 
 // Increment a shared variable in a thread safe manner.
-// Return the new value of that variable
-int safe_increment(int *counter, SemaphoreHandle_t semaphore)
+// Return the new value of that variable;
+// If the semaphore couldn't be acquired, return -1
+int safe_increment(int *counter, SemaphoreHandle_t semaphore, TickType_t wait_ticks)
 {
-    int local_count = 0;
+    int local_count = -1;
 
     // Critical section: capture and increment the counter
-    // to minimize critical section code
-    // NOTE: setting the time-out to portMAX_DELAY means that 
-    // xSemaphoreTake only returns when the semaphore was acquired,
-    // so there's no need to check the return value.
-    xSemaphoreTake(semaphore, portMAX_DELAY);
+    if (xSemaphoreTake(semaphore, wait_ticks) == pdTRUE)
     {
         local_count = ++(*counter);
+        xSemaphoreGive(semaphore);
     }
-    xSemaphoreGive(semaphore);
 
     return local_count;
 }

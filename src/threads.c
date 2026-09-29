@@ -33,7 +33,7 @@ void side_thread(void *void_params)
 	while (1) {
         vTaskDelay(100);
 
-        local_count = safe_increment(&params->counter, params->count_semaphore);
+        local_count = safe_increment(&params->counter, params->count_semaphore, portMAX_DELAY);
         safe_hello(thread_name, local_count, params->uart_semaphore);
 	}
 }
@@ -53,7 +53,7 @@ void main_thread(void *void_params)
 
         vTaskDelay(100);
 
-        local_count = safe_increment(&params->counter, params->count_semaphore);
+        local_count = safe_increment(&params->counter, params->count_semaphore, portMAX_DELAY);
         safe_hello(thread_name, local_count, params->uart_semaphore);
 	}
 }
