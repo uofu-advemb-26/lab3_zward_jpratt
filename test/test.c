@@ -1,25 +1,59 @@
 #include <stdio.h>
+#include <FreeRTOS.h>
 #include <pico/stdlib.h>
 #include <stdint.h>
 #include <unity.h>
 #include "unity_config.h"
+#include <semphr.h>
+#include "safe.h"
 
-void setUp(void) {}
+SemaphoreHandle_t count_semaphore;
+SemaphoreHandle_t uart_semaphore;
 
-void tearDown(void) {}
-
-void test_variable_assignment()
+void setUp(void)
 {
-    int x = 1;
-    TEST_ASSERT_TRUE_MESSAGE(x == 1,"Variable assignment failed.");
+    count_semaphore = xSemaphoreCreateCounting(1, 1);
+    uart_semaphore = xSemaphoreCreateCounting(1, 1);
 }
 
-void test_multiplication(void)
+void tearDown(void)
 {
-    int x = 30;
-    int y = 6;
-    int z = x / y;
-    TEST_ASSERT_TRUE_MESSAGE(z == 5, "Multiplication of two integers returned incorrect value.");
+    vSemaphoreDelete(count_semaphore);
+    vSemaphoreDelete(uart_semaphore);
+}
+
+void test_safe_increment_state_busy()
+{
+    int count = 1;
+
+    // Acquire a semaphore prior to the test
+    xSemaphoreTake(count_semaphore, portMAX_DELAY);
+    {
+        // Attempt to increment count while the semaphore is held (with a timeout)
+        safe_increment(&count, count_semaphore, 10);
+    }
+    xSemaphoreGive(count_semaphore);
+
+    // The counter shouldn't have incremented while the semaphore was held
+    TEST_ASSERT_EQUAL_MESSAGE(1, count, "Count state incremented while semaphore was held");
+}
+
+
+void test_safe_increment_return_busy()
+{
+    int count = 1;
+    int new_count = 0;
+
+    // Acquire a semaphore prior to the test
+    xSemaphoreTake(count_semaphore, portMAX_DELAY);
+    {
+        // Attempt to increment count while the semaphore is held (and timeout)
+        new_count = safe_increment(&count, count_semaphore, 10);
+    }
+    xSemaphoreGive(count_semaphore);
+
+    // The counter shouldn't have incremented while the semaphore was held
+    TEST_ASSERT_EQUAL_MESSAGE(-1, new_count, "New counter value incremented while semaphore was held");
 }
 
 int main (void)
@@ -29,8 +63,8 @@ int main (void)
         sleep_ms(5000); // Give time for TTY to attach.
         printf("Start tests\n");
         UNITY_BEGIN();
-        RUN_TEST(test_variable_assignment);
-        RUN_TEST(test_multiplication);
+        RUN_TEST(test_safe_increment_state_busy);
+        RUN_TEST(test_safe_increment_return_busy);
         sleep_ms(5000);
         UNITY_END();
     }
