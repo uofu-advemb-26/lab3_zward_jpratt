@@ -8,6 +8,8 @@ add_executable(test_all
   test_deadlocks.c
   ../src/deadlocks.c
   unity_config.c
+  ../src/orphaned.c
+  test_orphaned.c
 )
 
 target_link_libraries(test_all PRIVATE
