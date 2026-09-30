@@ -1,5 +1,5 @@
-#include test_orphaned.h
-#include orphaned.c
+#include "test_orphaned.h"
+#include "orphaned.h"
 
 
 void test_orphaned_lock_deadlocks()

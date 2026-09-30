@@ -9,6 +9,7 @@
 #include "test_safe_hello.h"
 #include "test_led.h"
 #include "test_deadlocks.h"
+#include "test_orphaned.h"
 
 // Same priority as deadlocking threads
 #define MAIN_PRIORITY      ( tskIDLE_PRIORITY + 1UL )
@@ -61,6 +62,8 @@ void run_tests()
         RUN_TEST(test_led_on);
 
         RUN_TEST(test_deadlock);
+
+        RUN_TEST(test_orphaned_lock_deadlocks);
         UNITY_END();
         sleep_ms(5000);
     }
