@@ -45,8 +45,11 @@ void run_tests()
         sleep_ms(5000); // Give time for TTY to attach.
         printf("Start tests\n");
         UNITY_BEGIN();
+
+        // Sanity check
         RUN_TEST(test_xSemaphore_status);
 
+        // Unit tests for threads.c (Activity 2)
         RUN_TEST(test_safe_increment_releases_semaphore);
         RUN_TEST(test_increment_updates_counter);
         RUN_TEST(test_increment_updates_count);
@@ -54,16 +57,19 @@ void run_tests()
         RUN_TEST(test_increment_from_nonzero_count);
         RUN_TEST(test_safe_increment_state_busy);
         RUN_TEST(test_safe_increment_return_busy);
-
         RUN_TEST(test_safe_hello_releases_semaphore);
         RUN_TEST(test_safe_hello_does_not_change_counter);
-
         RUN_TEST(test_led_off);
         RUN_TEST(test_led_on);
 
+        // Unit tests for deadlock (Activity 4)
         RUN_TEST(test_deadlock);
 
+        // Unit tests for orphaned lock (Activity 5)
+        RUN_TEST(test_orphaned_lock_odd);
+        RUN_TEST(test_orphaned_lock_even);
         RUN_TEST(test_orphaned_lock_deadlocks);
+
         UNITY_END();
         sleep_ms(5000);
     }

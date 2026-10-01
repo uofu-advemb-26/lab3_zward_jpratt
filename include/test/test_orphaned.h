@@ -12,6 +12,10 @@
 extern SemaphoreHandle_t semaphore;
 extern int counter;
 
+void test_orphaned_lock_even();
+void test_orphaned_lock_odd();
+void orphaned_output_test(int counter);
+
 void test_orphaned_lock_deadlocks();
 void orphaned_lock_wrapper(void *vargs);
 
