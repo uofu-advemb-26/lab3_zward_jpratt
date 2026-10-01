@@ -9,6 +9,10 @@
 #include <pico/multicore.h>
 #include <unity.h>
 
+extern SemaphoreHandle_t semaphore;
+extern int counter;
+
 void test_orphaned_lock_deadlocks();
+void orphaned_lock_wrapper(void *vargs);
 
 #endif

@@ -8,6 +8,10 @@
 #include <pico/stdlib.h>
 #include <pico/multicore.h>
 
-void orphaned_lock(void *vargs);
+typedef void (*OrphanedLockFunc_t)(const int);
+
+void orphaned_lock(SemaphoreHandle_t semaphore, int *counter);
+void orphaned_lock_iteration(SemaphoreHandle_t semaphore, int *counter, const TickType_t semaphore_delay, OrphanedLockFunc_t output_logic);
+void orphaned_output(int counter);
 
 #endif
