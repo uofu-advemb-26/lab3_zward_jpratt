@@ -18,5 +18,10 @@ void orphaned_output_test(int counter);
 
 void test_orphaned_lock_deadlocks();
 void orphaned_lock_wrapper(void *vargs);
+void test_fixed_lock_odd();
+void test_fixed_lock_even();
+void test_fixed_lock_busy();
+void test_fixed_lock_does_not_deadlock();
+void fixed_lock_wrapper(void *vargs);
 
 #endif

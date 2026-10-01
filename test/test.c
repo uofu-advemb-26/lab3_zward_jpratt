@@ -69,6 +69,10 @@ void run_tests()
         RUN_TEST(test_orphaned_lock_odd);
         RUN_TEST(test_orphaned_lock_even);
         RUN_TEST(test_orphaned_lock_deadlocks);
+        RUN_TEST(test_fixed_lock_odd);
+        RUN_TEST(test_fixed_lock_even);
+        RUN_TEST(test_fixed_lock_busy);
+        RUN_TEST(test_fixed_lock_does_not_deadlock);
 
         UNITY_END();
         sleep_ms(5000);
