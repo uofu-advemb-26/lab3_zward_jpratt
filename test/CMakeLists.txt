@@ -1,6 +1,15 @@
 add_executable(test_all 
   test.c
+  test_safe_increment.c
+  test_safe_hello.c
+  ../src/safe.c
+  test_led.c
+  ../src/led.c
+  test_deadlocks.c
+  ../src/deadlocks.c
   unity_config.c
+  ../src/orphaned.c
+  test_orphaned.c
 )
 
 target_link_libraries(test_all PRIVATE
